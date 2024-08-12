@@ -25,6 +25,14 @@ class HTMLNode:
     def text_node_to_html_node(text_node):
         return LeafNode(None, text_node)
 
+    def __eq__(self, other):
+        if not isinstance(other, HTMLNode):
+            return False
+        return (self.tag == other.tag and
+            self.value == other.value and
+            self.children == other.children and
+            self.props == other.props)
+
 class LeafNode(HTMLNode):
     def __init__(self, tag, value, props=None):
         super().__init__(tag, value, None, props)
@@ -38,6 +46,13 @@ class LeafNode(HTMLNode):
 
     def __repr__(self):
         return f"LeafNode(tag: {self.tag}, value: {self.value}, props: {self.props})"
+
+    def __eq__(self, other):
+        if not isinstance(other, LeafNode):
+            return False
+        return (self.tag == other.tag and
+            self.value == other.value and
+            self.props == other.props)
 
 class ParentNode(HTMLNode):
     def __init__(self, tag, children, props=None):
@@ -56,7 +71,16 @@ class ParentNode(HTMLNode):
     def __repr__(self):
         return f"ParentNode(tag: {self.tag}, children: {self.children}, props: {self.props})"
 
-def text_node_to_html_node(text_node: TextNode):
+    def __eq__(self, other):
+        if not isinstance(other, ParentNode):
+            return False
+        return (self.tag == other.tag and
+            self.children == other.children and
+            self.props == other.props)
+
+def text_node_to_html_node(text_node):
+    if not isinstance(text_node, TextNode):
+        raise TypeError("Input must be a TextNode instance")
     match text_node.text_type:
         case Text_Type.TEXT:
             return LeafNode(None, text_node.text)
@@ -67,6 +91,12 @@ def text_node_to_html_node(text_node: TextNode):
         case Text_Type.CODE:
             return LeafNode("code", text_node.text)
         case Text_Type.LINK:
+            if text_node.url is None:
+                raise ValueError("URL must be provided for link type TextNode")
             return LeafNode("a", text_node.text, {"href": text_node.url})
         case Text_Type.IMAGE:
+            if text_node.url is None:
+                raise ValueError("URL must be provided for image type TextNode")
             return LeafNode("img", "", {"src": text_node.url, "alt": text_node.text})
+        case _:
+            raise ValueError(f"Unsupported Text_Type: {text_node.text_type}")
