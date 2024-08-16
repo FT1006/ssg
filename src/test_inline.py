@@ -1,5 +1,5 @@
 import unittest
-from inline import TextNode, Text_Type, split_nodes_delimiter
+from inline import TextNode, Text_Type, split_nodes_delimiter, extract_markdown_images, extract_markdown_links
 from textnode import TextNode
 from enum import Enum
 
@@ -114,6 +114,38 @@ class TestSplitNodesDelimiter(unittest.TestCase):
     @staticmethod
     def format_nodes(nodes):
         return ', '.join([f"TextNode({node.text}, {node.text_type})" for node in nodes])
+    
+    def test_extract_markdown_images(self):
+        edge_cases = [
+            # No Exclamation Mark
+            ("This is text with a [rick roll](https://i.imgur.com/aKaOqIh.gif) and [obi wan](https://i.imgur.com/fJRm4Vk.jpeg)", []),
+            # Empty Alt Text
+            ("This is text with a ![](https://i.imgur.com/aKaOqIh.gif) and ![](https://i.imgur.com/fJRm4Vk.jpeg)", 
+             [("", "https://i.imgur.com/aKaOqIh.gif"), ("", "https://i.imgur.com/fJRm4Vk.jpeg")]),
+            # Empty URL
+            ("This is a text with a ![rick roll]() and ![obi wan]()", 
+             [("rick roll", ""), ("obi wan", "")]),
+            # Spaces Around Text
+            ("This is text with a ![ rick roll ](https://i.imgur.com/aKaOqIh.gif) and ![ obi wan ](https://i.imgur.com/fJRm4Vk.jpeg)", 
+             [(" rick roll ", "https://i.imgur.com/aKaOqIh.gif"), (" obi wan ", "https://i.imgur.com/fJRm4Vk.jpeg")]),
+            # Nested Brackets or Parentheses
+            ("This is text with a ![[image]rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan [the only one]](https://i.imgur.com/fJRm4Vk.jpeg)", 
+             [("[image]rick roll", "https://i.imgur.com/aKaOqIh.gif"), ("obi wan [the only one]", "https://i.imgur.com/fJRm4Vk.jpeg")]),
+            # Special Characters in Alt Text or URL
+            ("This is text with a ![rick *roll &^%$#@!](https://i.imgur.com/aKaOqIh.gif) and ![obi wan *&*&*&](https://i.imgur.com/fJRm4Vk.jpeg)", 
+             [("rick *roll &^%$#@!", "https://i.imgur.com/aKaOqIh.gif"), ("obi wan *&*&*&", "https://i.imgur.com/fJRm4Vk.jpeg")]),
+            # No URL but Parentheses Present
+            ("This is text with a ![rick roll](   ) and ![obi wan](  )", 
+             [("rick roll", "   "), ("obi wan", "  ")]),
+            # Alt Text with Newline Characters
+            ("This is text with a ![rick\nroll](https://i.imgur.com/aKaOqIh.gif) and ![obi\nwan](https://i.imgur.com/fJRm4Vk.jpeg)", 
+             []),
+        ]
+        
+        for text, expected in edge_cases:
+            with self.subTest(text=text):
+                actual = extract_markdown_images(text)
+                self.assertEqual(actual, expected)
 
 
 
