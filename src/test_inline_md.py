@@ -1,5 +1,5 @@
 import unittest
-from inline_md import TextNode, Text_Type, split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link
+from inline_md import *
 from textnode import TextNode
 from htmlnode import HTMLNode
 from enum import Enum
@@ -321,7 +321,7 @@ class TestSplitNodesDelimiter(unittest.TestCase):
             ),
             # No text at the front (Text, Expected)
             ([TextNode(
-                "[1st link](https://boot.dev) is a link",
+                "[Hello! 1st link](https://boot.dev) is a link",
                 Text_Type.TEXT,
             ),
             TextNode(
@@ -330,7 +330,7 @@ class TestSplitNodesDelimiter(unittest.TestCase):
             ),
             ], 
             [
-                TextNode("1st link", Text_Type.LINK, "https://boot.dev"),
+                TextNode("Hello! 1st link", Text_Type.LINK, "https://boot.dev"),
                 TextNode(" is a link", Text_Type.TEXT),
                 TextNode("2nd link", Text_Type.LINK, "https://22222.boot.dev"),
                 TextNode(" is the second link", Text_Type.TEXT),
@@ -389,7 +389,38 @@ class TestSplitNodesDelimiter(unittest.TestCase):
                 else:
                     actual = split_nodes_link(text)
                     self.assertListEqual(actual, expected)
-                    
+
+    def test_text_to_textnodes(self):
+        nodes = text_to_textnodes(
+            "This is **text** with an *italic* word and a `code block` and an ![image](https://i.imgur.com/zjjcJKZ.png) and a [link](https://boot.dev)"
+        )
+        print(nodes)
+        self.assertListEqual(
+            [
+                TextNode("This is ", Text_Type.TEXT),
+                TextNode("text", Text_Type.BOLD),
+                TextNode(" with an ", Text_Type.TEXT),
+                TextNode("italic", Text_Type.ITALIC),
+                TextNode(" word and a ", Text_Type.TEXT),
+                TextNode("code block", Text_Type.CODE),
+                TextNode(" and an ", Text_Type.TEXT),
+                TextNode("image", Text_Type.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+                TextNode(" and a ", Text_Type.TEXT),
+                TextNode("link", Text_Type.LINK, "https://boot.dev"),
+            ],
+            nodes,
+        )      
+    
 
 if __name__ == "__main__":
     unittest.main()
+
+[TextNode("This is ", Text_Type.TEXT, "None"), 
+ TextNode("text", Text_Type.BOLD, "None"), 
+ TextNode(" with an ", Text_Type.TEXT, "None"), 
+ TextNode("italic", Text_Type.ITALIC, "None"), 
+ TextNode(" word and a ", Text_Type.TEXT, "None"), 
+ TextNode("code block", Text_Type.CODE, "None"), 
+ TextNode("image", Text_Type.IMAGE, "https://i.imgur.com/zjjcJKZ.png"), 
+ TextNode(" and a ", Text_Type.TEXT, "None"), 
+ TextNode("link", Text_Type.LINK, "https://boot.dev")]
