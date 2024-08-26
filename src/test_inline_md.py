@@ -414,13 +414,3 @@ class TestSplitNodesDelimiter(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-[TextNode("This is ", Text_Type.TEXT, "None"), 
- TextNode("text", Text_Type.BOLD, "None"), 
- TextNode(" with an ", Text_Type.TEXT, "None"), 
- TextNode("italic", Text_Type.ITALIC, "None"), 
- TextNode(" word and a ", Text_Type.TEXT, "None"), 
- TextNode("code block", Text_Type.CODE, "None"), 
- TextNode("image", Text_Type.IMAGE, "https://i.imgur.com/zjjcJKZ.png"), 
- TextNode(" and a ", Text_Type.TEXT, "None"), 
- TextNode("link", Text_Type.LINK, "https://boot.dev")]
